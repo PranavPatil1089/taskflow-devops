@@ -1,194 +1,268 @@
-# TaskFlow
+# TaskFlow — End-to-End DevOps Implementation
 
-**A clean, beginner-friendly full-stack task manager built with MongoDB, Express, React and Node, made for learning and first open-source contributions.**
+A hands-on DevOps portfolio project focused on containerizing, testing and automating the deployment of a full-stack web application.
 
-[![CI](https://github.com/KEX-03/taskflow/actions/workflows/ci.yml/badge.svg)](https://github.com/KEX-03/taskflow/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Good first issues](https://img.shields.io/github/issues/KEX-03/taskflow/good%20first%20issue?label=good%20first%20issues&color=7057ff)](https://github.com/KEX-03/taskflow/labels/good%20first%20issue)
-[![Live demo](https://img.shields.io/badge/demo-live-success.svg)](https://taskflow-plum-one.vercel.app)
+The project uses Docker, Docker Compose, GitHub Actions and a CI/CD-oriented workflow. The goal is to demonstrate how an existing application can be prepared for reliable deployment using practical DevOps tools.
 
-![Short demo of TaskFlow: logging in and managing tasks](docs/images/demo.gif)
+## Project Overview
 
-## Live demo
+TaskFlow is a full-stack task management application with user authentication, task management and a dashboard.
 
-**👉 [taskflow-plum-one.vercel.app](https://taskflow-plum-one.vercel.app)**: sign up with any email (it doesn't need to be real) and try it out.
+This repository focuses on the DevOps implementation around the application rather than claiming original authorship of its application code.
 
-> ⏳ **The first load can take up to a minute.** The API runs on a free hosting plan that goes to sleep when nobody is using it, and waking up takes a moment. After that it's fast.
+### Application Features
 
-## Features
+- User registration and login.
+- JWT-based authentication.
+- Create, update and delete tasks.
+- Task filtering and search.
+- User profile management.
+- MongoDB database integration.
 
-- **Sign up and log in** with secure password hashing and JWT (token-based) authentication
-- **Dashboard** with task counts by status and your most recent tasks
-- **Tasks**: create, edit and delete, with optional due dates (overdue tasks are highlighted) and tags, search and filters by priority, status and tag
-- **Profile**: update your name, bio and avatar, and change your password
-- **Works on phones**: on small screens, the sidebar becomes a menu
-- **Protected pages**: logged-out visitors are sent to the login page
-- **Each user only sees their own tasks**, enforced by the API
-- **Clean, readable code** split into small files, with a [contributing guide](CONTRIBUTING.md) that explains where everything lives
+## Technology Stack
 
-<details>
-<summary><b>More screenshots</b></summary>
+| Area | Technologies |
+|---|---|
+| Frontend | React, Vite, Tailwind CSS |
+| Backend | Node.js, Express.js |
+| Database | MongoDB |
+| Containerization | Docker |
+| Multi-container orchestration | Docker Compose |
+| CI | GitHub Actions |
+| Version control | Git, GitHub |
 
-**Dashboard**
+## DevOps Implementation
 
-![Dashboard showing task statistics and recent tasks](docs/images/dashboard.png)
+### 1. Docker Containerization
 
-| Tasks | New task |
-|-------|----------|
-| ![Task list with status and priority badges](docs/images/tasks.png) | ![New task dialog](docs/images/task-form.png) |
+Created separate Dockerfiles for the frontend and backend.
 
-| Login | Profile |
-|-------|---------|
-| ![Login page](docs/images/login.png) | ![Profile page](docs/images/profile.png) |
+**Backend:**
+- Uses a Node.js production image.
+- Installs production dependencies using `npm ci`.
+- Runs as a non-root user.
+- Uses environment variables for configuration.
 
-</details>
+**Frontend:**
+- Uses a multi-stage Docker build.
+- Builds the React application using Node.js.
+- Serves the generated static files using Nginx.
 
-## Tech stack
+### 2. Docker Compose
 
-| Part | Technology |
-|------|------------|
-| Frontend | [React 18](https://react.dev), [React Router 7](https://reactrouter.com), [Tailwind CSS 4](https://tailwindcss.com), [Axios](https://axios-http.com), built with [Vite](https://vite.dev) |
-| Backend | [Node.js](https://nodejs.org), [Express 4](https://expressjs.com) |
-| Database | [MongoDB](https://www.mongodb.com) with [Mongoose](https://mongoosejs.com) |
-| Auth | JSON Web Tokens ([jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)), password hashing with [bcryptjs](https://github.com/dcodeIO/bcrypt.js) |
-| Hosting (demo) | [Vercel](https://vercel.com) (frontend), [Render](https://render.com) (API), [MongoDB Atlas](https://www.mongodb.com/atlas) (database) |
+Configured three services:
 
-## Quick start
+| Service | Purpose | Port |
+|---|---|---|
+| Frontend | React application served through Nginx | 3000 |
+| Backend | Express REST API | 5000 |
+| MongoDB | Application database | Internal |
 
-### 1. What you need
+Docker Compose manages the services and persistent MongoDB storage.
 
-- [Node.js](https://nodejs.org) **22.12 or newer** (24 recommended). Check with `node --version`.
-- [Git](https://git-scm.com)
-- **MongoDB**, either one of:
-  - **Local:** install [MongoDB Community Server](https://www.mongodb.com/try/download/community). Nothing else to configure.
-  - **Cloud (free):** create a cluster on [MongoDB Atlas](https://www.mongodb.com/atlas) and copy its connection string (see [step 1 of the deployment guide](docs/DEPLOYMENT.md#1-database-mongodb-atlas)).
+### 3. Production Configuration
 
-### 2. Clone and install
+Implemented backend validation for production settings:
+
+- JWT secret validation.
+- MongoDB connection-string validation.
+- Frontend origin validation.
+- Prevention of exposing internal server errors to clients in production.
+
+### 4. Automated Testing
+
+Backend tests cover authentication, task operations, validation, CORS and production configuration.
+
+Frontend quality checks include ESLint and a production build.
+
+### 5. GitHub Actions
+
+A CI workflow is configured to run on pushes and pull requests targeting the `main` branch.
+
+It includes:
+- Backend dependency installation and linting.
+- Backend automated tests.
+- Frontend dependency installation and linting.
+- Frontend production build.
+
+## Architecture
+
+```text
+             Developer
+                 |
+                 | Git Push
+                 v
+              GitHub
+                 |
+                 v
+          GitHub Actions
+                 |
+          +------+------+
+          |             |
+          v             v
+     Backend Tests   Frontend Build
+          |             |
+          +------+------+
+                 |
+                 v
+           Docker Compose
+                 |
+       +---------+---------+
+       |         |         |
+       v         v         v
+    Frontend  Backend   MongoDB
+     Nginx    Express    Database
+       |         |
+       +---------+
+           API
+```
+
+## Run the Project Locally
+
+### Prerequisites
+
+- Windows, Linux or macOS.
+- Docker Desktop or Docker Engine with Docker Compose.
+- Git.
+
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/KEX-03/taskflow.git
-cd taskflow
-npm run install:all
+git clone https://github.com/PranavPatil1089/taskflow-devops.git
+cd taskflow-devops
 ```
 
-Planning to contribute? [Fork the repository](https://github.com/KEX-03/taskflow/fork) first and clone your fork instead (see [CONTRIBUTING.md](CONTRIBUTING.md#fork-and-clone)).
+### 2. Create a JWT secret
 
-### 3. Create your settings files
+Create a `.env` file in the project root:
+
+```env
+JWT_SECRET=replace_with_a_secure_random_secret_of_at_least_32_characters
+```
+
+Do not commit this file or share its contents.
+
+### 3. Create persistent database storage
 
 ```bash
-# macOS / Linux / Git Bash
-cp server/.env.example server/.env
-cp client/.env.example client/.env
+docker volume create taskflow-mongo-data
 ```
 
-```powershell
-# Windows PowerShell
-Copy-Item server/.env.example server/.env
-Copy-Item client/.env.example client/.env
-```
+### 4. Build the Docker images
 
-The defaults work with a **local MongoDB**. Using **Atlas**? Open `server/.env` and replace `MONGO_URI` with your connection string. Every setting is explained in the `.env.example` files.
-
-### 4. Run it
+Build the backend:
 
 ```bash
-npm run dev
+docker build -t taskflow-backend:v1 ./server
 ```
 
-This starts both parts together:
+Build the frontend:
 
-- **API** at http://localhost:5000 (health check: http://localhost:5000/api/v1/health)
-- **App** at **http://localhost:3000**: open it and sign up for an account
-
-| Command (from the repository root) | What it does |
-|------------------------------------|--------------|
-| `npm run install:all` | Install dependencies for the root, server and client |
-| `npm run dev` | Start the API and the app together |
-| `npm run dev:server` | Start only the API |
-| `npm run dev:client` | Start only the app |
-| `npm run build` | Build the app for production (into `client/dist/`) |
-| `npm test` | Run the automated tests (the backend and the release and merge scripts) |
-| `npm run lint` | Check the code for likely bugs with ESLint |
-| `npm run seed` | Populate the database with a demo user and sample tasks (use `npm run seed -- --allow-remote` for remote databases) |
-
-**Running the tests:** the API tests need MongoDB running locally, the same as `npm run dev`. They use a separate `taskflow_test` database and delete it when they finish, so your own data is never touched.
-
-**Something not working?** The server prints a `❌` message explaining what's wrong, for example a missing setting or MongoDB not running.
-
-## Project structure
-
+```bash
+docker build -t taskflow-frontend:v1 \
+  --build-arg VITE_API_URL=http://localhost:5000/api/v1 \
+  ./client
 ```
-taskflow/
-├── server/                  Express REST API
+
+### 5. Start the application
+
+```bash
+docker compose up -d
+```
+
+### 6. Access the application
+
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
+
+### 7. Useful Docker Compose commands
+
+Check running services:
+
+```bash
+docker compose ps
+```
+
+View logs:
+
+```bash
+docker compose logs
+```
+
+Stop the application:
+
+```bash
+docker compose down
+```
+
+The named MongoDB volume is retained when the application is stopped using `docker compose down`.
+
+**Important:** Do not use `docker compose down -v` if you want to preserve database data.
+
+## Project Structure
+
+```text
+taskflow-devops/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── client/
 │   ├── src/
-│   │   ├── server.js        Entry point: connects to MongoDB and starts the server
-│   │   ├── app.js           The Express app: middleware and routes
-│   │   ├── config/          MongoDB connection
-│   │   ├── models/          Mongoose schemas (User, Task)
-│   │   ├── controllers/     Request handlers: the logic for each endpoint
-│   │   ├── routes/          Maps URLs to controllers
-│   │   ├── middleware/      `protect`: checks the login token
-│   │   └── utils/           Helpers for tokens, errors and query parsing
-│   ├── test/                Automated tests for the helpers and the task API
-│   └── .env.example         Server settings, explained
-├── client/                  React app (Vite)
+│   ├── Dockerfile
+│   └── .dockerignore
+│
+├── server/
 │   ├── src/
-│   │   ├── App.jsx          All page routes
-│   │   ├── pages/           One file per page (Login, Dashboard, Tasks, ...)
-│   │   ├── components/      Shared UI (Sidebar, Toast, Spinner, ...)
-│   │   ├── context/         AuthContext: who is logged in
-│   │   └── utils/           Axios API client, form validation, date helpers
-│   ├── vercel.json          Lets Vercel serve every page route
-│   └── .env.example         Client settings, explained
-├── docs/                    Architecture overview, deployment guide and images
-├── postman_collection.json  Ready-made API requests for Postman
-└── package.json             Helper scripts to run everything from the root
+│   ├── test/
+│   ├── Dockerfile
+│   └── .dockerignore
+│
+├── docs/
+├── compose.yaml
+├── .gitignore
+└── README.md
 ```
 
-**New to the code?** [How TaskFlow works](docs/ARCHITECTURE.md) is a five-minute tour of the request flow, login, data model and React app.
+## Project Roadmap
 
-## API overview
+The following are planned extensions, not yet completed:
 
-All endpoints start with `/api/v1`. Endpoints marked 🔒 need a login token in the header: `Authorization: Bearer <token>`. You get a token from signup or login. For full request and response examples, query parameters, and error schemas, see the [API Reference](docs/API.md).
+- [ ] Improve GitHub Actions CI/CD pipeline.
+- [ ] Build and publish Docker images to GitHub Container Registry (GHCR).
+- [ ] Integrate Trivy for container vulnerability scanning.
+- [ ] Deploy the application on Kubernetes using Kind.
+- [ ] Implement GitOps deployment using Argo CD.
+- [ ] Add monitoring and observability.
 
-| Method | Endpoint | | Description |
-|--------|----------|---|-------------|
-| `POST` | `/auth/signup` | | Create an account, returns a token |
-| `POST` | `/auth/login` | | Log in, returns a token |
-| `POST` | `/auth/logout` | 🔒 | Log out (the app deletes its token) |
-| `GET` | `/me` | 🔒 | Get your profile |
-| `PUT` | `/me` | 🔒 | Update your profile or password |
-| `GET` | `/tasks` | 🔒 | List your tasks. Optional: `?search=`, `?status=`, `?priority=`, `?tag=`, `?page=`, `?limit=` |
-| `POST` | `/tasks` | 🔒 | Create a task |
-| `GET` | `/tasks/:id` | 🔒 | Get one task |
-| `PUT` | `/tasks/:id` | 🔒 | Update a task |
-| `DELETE` | `/tasks/:id` | 🔒 | Delete a task |
-| `GET` | `/health` | | Check that the API is running |
+## Learning Objectives
 
-Login allows 10 failed attempts and signup 10 requests per 15 minutes per IP address. After that, they return `429 Too Many Requests`.
+This project is intended to demonstrate practical understanding of:
 
-**Try it in Postman:** import [`postman_collection.json`](postman_collection.json). After you run *Signup* or *Login*, the token is saved and used by every other request automatically.
+- Linux and application deployment.
+- Docker image creation and container management.
+- Docker Compose.
+- Environment variables and secrets management.
+- Git and GitHub workflows.
+- Continuous Integration.
+- Container security.
+- Kubernetes and GitOps as the project evolves.
 
-Every response includes standard security headers, like `X-Content-Type-Options: nosniff` and `X-Frame-Options`, set by [Helmet](https://helmetjs.github.io/).
+## Original Application and Attribution
 
-## Deployment
+The original TaskFlow application source code is based on the open-source project by [KEX-03](https://github.com/KEX-03/taskflow).
 
-TaskFlow runs on free plans of MongoDB Atlas, Render and Vercel. The [deployment guide](docs/DEPLOYMENT.md) walks through every setting and environment variable.
+This repository builds upon that application to demonstrate an independent DevOps implementation.
 
-## Contributing
+The original MIT licence and copyright notice are retained in the `LICENSE` file.
 
-Contributions of all sizes are welcome, especially from **first-time contributors**! 🎉
+## Author
 
-1. Pick an issue labelled [**good first issue**](https://github.com/KEX-03/taskflow/labels/good%20first%20issue) and comment that you'd like to work on it. These are reserved for people making their first few open-source contributions. If you've done several already, pick a [**help wanted**](https://github.com/KEX-03/taskflow/labels/help%20wanted) issue instead.
-2. Follow the [contributing guide](CONTRIBUTING.md): it covers setup, branches, commit messages, testing and opening a pull request, step by step.
-3. Give your pull request a [Conventional Commits](https://www.conventionalcommits.org) title and fill in "What does this PR do?": approved pull requests are merged automatically, and those become the commit on `main`.
-4. Questions? Ask in [Discussions](https://github.com/KEX-03/taskflow/discussions).
+**Pranav Patil**
 
-Please follow our [Code of Conduct](CODE_OF_CONDUCT.md). Found a security problem? See [SECURITY.md](SECURITY.md). Changes are listed in the [changelog](CHANGELOG.md).
-
-If TaskFlow helped you learn something or you enjoyed contributing, a ⭐ on the repo helps other first-time contributors find it.
+GitHub: [PranavPatil1089](https://github.com/PranavPatil1089)
 
 ## License
 
-[MIT](LICENSE) © 2026 KEX-03
+The original application is distributed under the MIT License. See the `LICENSE` file for details.
