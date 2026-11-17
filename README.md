@@ -8,7 +8,7 @@ The project uses Docker, Docker Compose, GitHub Actions and a CI/CD-oriented wor
 
 TaskFlow is a full-stack task management application with user authentication, task management and a dashboard.
 
-This repository focuses on the DevOps implementation around the application rather than claiming original authorship of its application code.
+This repository focuses on the DevOps implementation around the application 
 
 ### Application Features
 
