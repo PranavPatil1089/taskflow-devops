@@ -78,21 +78,51 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push backend image
+      - name: Build backend image
         uses: docker/build-push-action@v6
         with:
           context: ./server
-          push: true
+          load: true
           tags: |
             ghcr.io/pranavpatil1089/taskflow-backend:latest
             ghcr.io/pranavpatil1089/taskflow-backend:${{ github.sha }}
-      - name: Build and push frontend image
+      - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
           context: ./client
-          push: true
+          load: true
           build-args: |
             VITE_API_URL=http://localhost:5000/api/v1
           tags: |
             ghcr.io/pranavpatil1089/taskflow-frontend:latest
             ghcr.io/pranavpatil1089/taskflow-frontend:${{ github.sha }}
+
+      - name: Scan backend image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/pranavpatil1089/taskflow-backend:latest
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
+      - name: Scan frontend image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/pranavpatil1089/taskflow-frontend:latest
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
+      - name: Push backend image to GHCR
+        run: |
+          docker push ghcr.io/pranavpatil1089/taskflow-backend:latest
+          docker push ghcr.io/pranavpatil1089/taskflow-backend:${{ github.sha }}
+
+      - name: Push frontend image to GHCR
+        run: |
+          docker push ghcr.io/pranavpatil1089/taskflow-frontend:latest
+          docker push ghcr.io/pranavpatil1089/taskflow-frontend:${{ github.sha }}
