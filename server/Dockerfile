@@ -1,4 +1,5 @@
 FROM node:24-bookworm-slim
+RUN npm install -g npm@12.2.3
 
 WORKDIR /app
 
